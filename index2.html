@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyección Financiera Pablo 2026 v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a1a; padding: 20px; max-width: 920px; margin: 0 auto; }
+h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+.sub { font-size: 13px; color: #666; margin-bottom: 20px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 13px; color: #555; }
+.tab-btn.act { background: #f0f0f0; color: #111; border-color: #aaa; font-weight: 500; }
+.tab { display: none; }
+.tab.active { display: block; }
+.grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.mcard { background: #f0f0f0; border-radius: 8px; padding: 12px 14px; }
+.mcard .lbl { font-size: 11px; color: #666; margin-bottom: 4px; }
+.mcard .val { font-size: 20px; font-weight: 500; }
+.mcard .sub2 { font-size: 11px; color: #888; margin-top: 3px; }
+.card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+.sec-title { font-size: 11px; font-weight: 500; color: #888; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; }
+.alert { border-radius: 8px; padding: 10px 14px; font-size: 13px; line-height: 1.5; margin-bottom: 14px; }
+.alert-red { background: #FEECEC; color: #7A1F1F; }
+.alert-amber { background: #FEF3E0; color: #7A4800; }
+.alert-green { background: #EDFAEF; color: #1A5E2A; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.slider-row label { font-size: 13px; color: #444; flex: 1; min-width: 0; }
+.slider-row input[type=range] { width: 150px; flex-shrink: 0; accent-color: #3266AD; }
+.slider-row .readout { font-size: 13px; font-weight: 500; min-width: 95px; text-align: right; color: #111; }
+.select-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.select-row label { font-size: 13px; color: #444; flex: 1; }
+.select-row select { padding: 5px 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; background: white; color: #111; }
+.fixed-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.fixed-row input[type=number] { width: 80px; padding: 5px 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; text-align: right; }
+.fixed-row input[type=text] { flex: 1; padding: 5px 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; }
+.fixed-row .rm { background: none; border: none; cursor: pointer; color: #c0392b; font-size: 18px; line-height: 1; padding: 0 2px; }
+.add-btn { padding: 6px 12px; border-radius: 6px; border: 1px solid #3266AD; background: white; color: #3266AD; cursor: pointer; font-size: 13px; margin-top: 6px; }
+.milestone { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; line-height: 1.5; }
+.milestone:last-child { border-bottom: none; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; margin-left: 6px; }
+.cat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.cat-lbl { font-size: 12px; color: #555; width: 140px; flex-shrink: 0; }
+.cat-track { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; position: relative; overflow: hidden; }
+.cat-fill-bg { height: 100%; border-radius: 4px; position: absolute; left: 0; top: 0; opacity: 0.28; }
+.cat-fill-fg { height: 100%; border-radius: 4px; position: absolute; left: 0; top: 0; }
+.cat-val { font-size: 12px; width: 55px; text-align: right; flex-shrink: 0; }
+.cat-delta { font-size: 11px; width: 55px; text-align: right; flex-shrink: 0; color: #c0392b; }
+.chart-wrap { position: relative; width: 100%; margin-bottom: 12px; }
+.dist-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dist-row .dname { font-size: 13px; color: #444; width: 155px; flex-shrink: 0; }
+.dist-row input[type=range] { flex: 1; accent-color: #3266AD; }
+.dist-row .dval { font-size: 13px; font-weight: 500; width: 75px; text-align: right; flex-shrink: 0; }
+table.rt { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.rt th { font-size: 11px; color: #888; font-weight: 500; text-align: left; padding: 4px 8px 8px; border-bottom: 1px solid #eee; }
+table.rt td { padding: 7px 8px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; line-height: 1.4; }
+table.rt tr:last-child td { border-bottom: none; }
+.kb { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
+.kg { background: #EDFAEF; color: #1A5E2A; }
+.ka { background: #FEF3E0; color: #7A4800; }
+.kr { background: #FEECEC; color: #7A1F1F; }
+@media (max-width: 620px) {
+  .row2 { grid-template-columns: 1fr; }
+  .slider-row input[type=range] { width: 100px; }
+}
+</style>
+</head>
+<body>
+
+<h1>Proyección financiera — Pablo 2026</h1>
+<p class="sub">Calculadora interactiva · Datos hasta mayo 2026</p>
+
+<div class="tabs">
+  <button class="tab-btn act" onclick="switchTab('estado')">Estado actual</button>
+  <button class="tab-btn" onclick="switchTab('calculadora')">Calculadora</button>
+  <button class="tab-btn" onclick="switchTab('redistribucion')">Redistribución</button>
+  <button class="tab-btn" onclick="switchTab('recurrentes')">Recurrentes</button>
+  <button class="tab-btn" onclick="switchTab('categorias')">Categorías</button>
+</div>
+
+<!-- ESTADO -->
+<div id="t-estado" class="tab active">
+  <div class="grid4">
+    <div class="mcard"><p class="lbl">Ahorros ahora</p><p class="val">16.000 €</p></div>
+    <div class="mcard"><p class="lbl">Ingresos reales/mes</p><p class="val">1.050 €</p><p class="sub2">solo paro</p></div>
+    <div class="mcard"><p class="lbl">Gasto total medio</p><p class="val">3.433 €</p><p class="sub2">media ene–abr</p></div>
+    <div class="mcard"><p class="lbl">Quema/mes</p><p class="val" style="color:#c0392b;">2.383 €</p><p class="sub2">sale de ahorros</p></div>
+  </div>
+  <div class="alert alert-red">
+    Ingresos reales (paro 1.050 €) cubren solo el 31% del gasto. Los restantes 2.383 € salen de ahorros cada mes. Sin cambios, los 16.000 € se agotan antes de diciembre 2026.
+  </div>
+  <div class="card">
+    <p class="sec-title">Fases de ingresos</p>
+    <div class="milestone"><div class="dot" style="background:#1D9E75;"></div><div><strong>May–ago 2026</strong> <span class="badge" style="background:#EDFAEF;color:#1A5E2A;">ahora</span><br>Paro 1.050 € + complemento de ahorros. IESE en marcha.</div></div>
+    <div class="milestone"><div class="dot" style="background:#BA7517;"></div><div><strong>Sep–dic 2026</strong> <span class="badge" style="background:#FEF3E0;color:#7A4800;">clave</span><br>Nuevo trabajo → paro se suspende (son excluyentes). Si no hay trabajo, paro sigue a 1.050 €.</div></div>
+    <div class="milestone"><div class="dot" style="background:#E24B4A;"></div><div><strong>Ene 2027+</strong> <span class="badge" style="background:#FEECEC;color:#7A1F1F;">riesgo</span><br>Sin trabajo: paro baja a 550 €. Con trabajo: paro suspendido, sueldo lo compensa. Este es el cliff financiero más importante.</div></div>
+    <div class="milestone"><div class="dot" style="background:#3266AD;"></div><div><strong>May–jun 2027</strong> <span class="badge" style="background:#E6F1FB;color:#0C447C;">objetivo</span><br>Fin del IESE. Estabilización financiera completa.</div></div>
+  </div>
+  <div class="card">
+    <p class="sec-title">Escenarios rápidos</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;">
+      <div style="background:#FEECEC;border-radius:8px;padding:12px;"><div style="font-size:12px;font-weight:500;color:#7A1F1F;margin-bottom:5px;">Sin trabajo, sin cambios</div><div style="font-size:13px;color:#7A1F1F;">Ahorros agotados: <strong>nov 2026</strong><br>Quema: ~2.383 €/mes</div></div>
+      <div style="background:#FEF3E0;border-radius:8px;padding:12px;"><div style="font-size:12px;font-weight:500;color:#7A4800;margin-bottom:5px;">Gasto reducido a 2.000 €</div><div style="font-size:13px;color:#7A4800;">Ahorros en jun 27: ~<strong>6.500 €</strong><br>Quema: ~1.707 €/mes</div></div>
+      <div style="background:#EDFAEF;border-radius:8px;padding:12px;"><div style="font-size:12px;font-weight:500;color:#1A5E2A;margin-bottom:5px;">Trabajo sep 2.500 € neto</div><div style="font-size:13px;color:#1A5E2A;">Ahorros en jun 27: ~<strong>13.000 €</strong><br>Situación cómoda</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CALCULADORA -->
+<div id="t-calculadora" class="tab">
+  <div class="row2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><p class="sec-title" style="margin:0;">Ingresos</p><button onclick="resetCalc()" style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid #bbb;background:white;color:#555;cursor:pointer;">Restaurar valores</button></div>
+      <div class="slider-row">
+        <label>Paro actual</label>
+        <input type="range" id="sl-paro" min="800" max="1300" step="50" value="1050" oninput="syncOut('paro');updateCalc()">
+        <span class="readout" id="out-paro">1.050 €</span>
+      </div>
+      <div class="select-row">
+        <label>¿Cuándo empiezas a trabajar?</label>
+        <select id="sel-mes" onchange="updateCalc()">
+          <option value="-1">Sin trabajo</option>
+          <option value="0">May 2026</option>
+          <option value="1">Jun 2026</option>
+          <option value="2">Jul 2026</option>
+          <option value="3">Ago 2026</option>
+          <option value="4" selected>Sep 2026</option>
+          <option value="5">Oct 2026</option>
+          <option value="6">Nov 2026</option>
+          <option value="7">Dic 2026</option>
+          <option value="8">Ene 2027</option>
+          <option value="9">Feb 2027</option>
+          <option value="10">Mar 2027</option>
+        </select>
+      </div>
+      <div class="slider-row">
+        <label>Sueldo neto mensual</label>
+        <input type="range" id="sl-sueldo" min="0" max="6000" step="100" value="0" oninput="syncOut('sueldo');updateCalc()">
+        <span class="readout" id="out-sueldo">0 €</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:-8px 0 12px;">
+        <button id="btn-excluyente" onclick="toggleExcluyente()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid #3266AD;background:#3266AD;color:white;cursor:pointer;font-weight:500;">Excluyente</button>
+        <span id="txt-excluyente" style="font-size:11px;color:#888;">Al trabajar, el paro se suspende.</span>
+      </div>
+      <div class="slider-row">
+        <label>Paro reducido (ene 27+, si no trabajas)</label>
+        <input type="range" id="sl-paro2" min="0" max="800" step="50" value="550" oninput="syncOut('paro2');updateCalc()">
+        <span class="readout" id="out-paro2">550 €</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><p class="sec-title" style="margin:0;">Gastos fijos</p><button onclick="resetFixed()" style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid #bbb;background:white;color:#555;cursor:pointer;">Restaurar</button></div>
+      <div id="fixed-list"></div>
+      <button class="add-btn" onclick="addFixed()">+ Añadir gasto fijo</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><p class="sec-title" style="margin:0;">Gasto variable y ahorros</p></div>
+    <div class="slider-row">
+      <label>Gasto variable/mes (sin los fijos de arriba)</label>
+      <input type="range" id="sl-gasto" min="800" max="3500" step="50" value="2200" oninput="syncOut('gasto');updateCalc()">
+      <span class="readout" id="out-gasto">2.200 €</span>
+    </div>
+    <div class="slider-row">
+      <label>Ahorros actuales</label>
+      <input type="range" id="sl-ahorro" min="5000" max="25000" step="500" value="16000" oninput="syncOut('ahorro');updateCalc()">
+      <span class="readout" id="out-ahorro">16.000 €</span>
+    </div>
+  </div>
+
+  <div class="grid4">
+    <div class="mcard"><p class="lbl">Ahorros en jun 2027</p><p class="val" id="calc-jun27">—</p></div>
+    <div class="mcard"><p class="lbl">Se agotan en</p><p class="val" id="calc-agota">—</p></div>
+    <div class="mcard"><p class="lbl">Quema neta/mes</p><p class="val" id="calc-quema">—</p></div>
+    <div class="mcard"><p class="lbl">Estado</p><p class="val" id="calc-estado" style="font-size:14px;">—</p></div>
+  </div>
+  <div id="calc-alert" class="alert"></div>
+  <p class="sec-title">Proyección de ahorros</p>
+  <div class="chart-wrap" style="height:270px;"><canvas id="chartCalc" role="img" aria-label="Proyección de ahorros con parámetros del simulador">Proyección calculadora</canvas></div>
+  <div style="display:flex;gap:14px;font-size:12px;color:#666;margin-top:8px;">
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#3266AD;display:inline-block;"></span>Ahorros</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:3px;background:#E24B4A;display:inline-block;margin-top:3px;"></span>Mínimo seguro 3.000 €</span>
+  </div>
+</div>
+
+<!-- REDISTRIBUCION -->
+<div id="t-redistribucion" class="tab">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><p style="font-size:13px;color:#555;line-height:1.6;">Ajusta cada partida de ingresos y gastos para ver cómo impacta en la proyección. Útil para simular escenarios: ¿qué pasa si bajo el alquiler? ¿si trabajo media jornada?</p><button onclick="resetDist()" style="font-size:11px;padding:3px 10px;border-radius:6px;border:1px solid #bbb;background:white;color:#555;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-left:12px;">Restaurar valores</button></div>
+  <div class="row2">
+    <div class="card">
+      <p class="sec-title">Ingresos mensuales</p>
+      <div class="dist-row"><span class="dname">Paro</span><input type="range" id="d-paro" min="0" max="1300" step="50" value="1050" oninput="updateDist()"><span class="dval" id="dv-paro">1.050 €</span></div>
+      <div class="dist-row"><span class="dname">Complemento de ahorros</span><input type="range" id="d-comp" min="0" max="3000" step="100" value="1500" oninput="updateDist()"><span class="dval" id="dv-comp">1.500 €</span></div>
+      <div class="dist-row"><span class="dname">Sueldo trabajo</span><input type="range" id="d-sueldo" min="0" max="5000" step="100" value="0" oninput="updateDist()"><span class="dval" id="dv-sueldo">0 €</span></div>
+      <div style="border-top:1px solid #f0f0f0;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;">
+        <span style="color:#666;">Total ingresos</span><strong id="dist-total-in">2.550 €</strong>
+      </div>
+    </div>
+    <div class="card">
+      <p class="sec-title">Gastos mensuales</p>
+      <div class="dist-row"><span class="dname">Alquiler</span><input type="range" id="d-alq" min="400" max="1500" step="50" value="757" oninput="updateDist()"><span class="dval" id="dv-alq">757 €</span></div>
+      <div class="dist-row"><span class="dname">Restaurantes/bares</span><input type="range" id="d-rest" min="0" max="1000" step="25" value="630" oninput="updateDist()"><span class="dval" id="dv-rest">630 €</span></div>
+      <div class="dist-row"><span class="dname">Transporte</span><input type="range" id="d-transp" min="0" max="700" step="25" value="438" oninput="updateDist()"><span class="dval" id="dv-transp">438 €</span></div>
+      <div class="dist-row"><span class="dname">Supermercado</span><input type="range" id="d-super" min="50" max="400" step="25" value="196" oninput="updateDist()"><span class="dval" id="dv-super">196 €</span></div>
+      <div class="dist-row"><span class="dname">Compras / ocio</span><input type="range" id="d-compras" min="0" max="500" step="25" value="298" oninput="updateDist()"><span class="dval" id="dv-compras">298 €</span></div>
+      <div class="dist-row"><span class="dname">Bizum / Revolut</span><input type="range" id="d-bizum" min="0" max="600" step="25" value="537" oninput="updateDist()"><span class="dval" id="dv-bizum">537 €</span></div>
+      <div class="dist-row"><span class="dname">Fijos + suscripciones</span><input type="range" id="d-fijos" min="50" max="400" step="10" value="195" oninput="updateDist()"><span class="dval" id="dv-fijos">195 €</span></div>
+      <div style="border-top:1px solid #f0f0f0;margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;">
+        <span style="color:#666;">Total gastos</span><strong id="dist-total-out">3.051 €</strong>
+      </div>
+    </div>
+  </div>
+  <div class="grid4">
+    <div class="mcard"><p class="lbl">Balance mensual</p><p class="val" id="dist-balance">—</p></div>
+    <div class="mcard"><p class="lbl">Quema ahorros/mes</p><p class="val" id="dist-quema">—</p></div>
+    <div class="mcard"><p class="lbl">Ahorros en jun 2027</p><p class="val" id="dist-jun27">—</p></div>
+    <div class="mcard"><p class="lbl">Estado</p><p class="val" id="dist-estado" style="font-size:14px;">—</p></div>
+  </div>
+  <div id="dist-alert" class="alert"></div>
+  <p class="sec-title">Proyección con esta distribución</p>
+  <div class="chart-wrap" style="height:250px;"><canvas id="chartDist" role="img" aria-label="Proyección con distribución personalizada">Proyección redistribución</canvas></div>
+</div>
+
+<!-- RECURRENTES -->
+<div id="t-recurrentes" class="tab">
+  <p style="font-size:13px;color:#555;margin-bottom:14px;line-height:1.6;">Gastos recurrentes identificados en los extractos enero–mayo 2026.</p>
+  <div class="card">
+    <table class="rt">
+      <thead><tr><th>Concepto</th><th>Cat.</th><th style="text-align:right;">€/mes</th><th style="text-align:right;">€/año</th><th>Estado</th><th style="min-width:160px;">Nota</th></tr></thead>
+      <tbody>
+        <tr><td>Alquiler</td><td>Fijo</td><td style="text-align:right;">757</td><td style="text-align:right;">9.084</td><td><span class="kb ka">Fijo</span></td><td style="color:#666;font-size:12px;">Mayor gasto. Evaluar opciones post-IESE.</td></tr>
+        <tr><td>Basic Fit</td><td>Deporte</td><td style="text-align:right;">~30</td><td style="text-align:right;">360</td><td><span class="kb kg">Mantener</span></td><td style="color:#666;font-size:12px;">Precio bajo. Vale si vas regularmente.</td></tr>
+        <tr><td>Apple iCloud/apps</td><td>Digital</td><td style="text-align:right;">~10</td><td style="text-align:right;">120</td><td><span class="kb kg">Mantener</span></td><td style="color:#666;font-size:12px;">Infraestructura básica.</td></tr>
+        <tr><td>Disney+</td><td>Streaming</td><td style="text-align:right;">7</td><td style="text-align:right;">84</td><td><span class="kb ka">Revisar</span></td><td style="color:#666;font-size:12px;">Pausar si el uso no es regular. 7 €/mes = 84 €/año.</td></tr>
+        <tr><td>Adobe Creative Cloud</td><td>Software</td><td style="text-align:right;">~30–60</td><td style="text-align:right;">360–720</td><td><span class="kb ka">Revisar</span></td><td style="color:#666;font-size:12px;">Si no es uso profesional diario, bajar al plan Photography (~12 €/mes).</td></tr>
+        <tr><td>Claude.ai</td><td>Digital</td><td style="text-align:right;">~20</td><td style="text-align:right;">240</td><td><span class="kb kg">Mantener</span></td><td style="color:#666;font-size:12px;">Uso activo y ROI demostrado.</td></tr>
+        <tr><td>Arbitrade Vending</td><td>Café</td><td style="text-align:right;">~30</td><td style="text-align:right;">360</td><td><span class="kb kr">Eliminar</span></td><td style="color:#666;font-size:12px;">+20 cargos/mes de 1–2 €. Café de máquina diario. Termo o cafetería = -25 €/mes fácil.</td></tr>
+        <tr><td>Wertgarantie</td><td>Seguro</td><td style="text-align:right;">17</td><td style="text-align:right;">204</td><td><span class="kb ka">Revisar</span></td><td style="color:#666;font-size:12px;">Seguro de dispositivo. Valorar si el aparato lo justifica.</td></tr>
+        <tr><td>Glovo (patrón)</td><td>Delivery</td><td style="text-align:right;">~109</td><td style="text-align:right;">1.308</td><td><span class="kb kr">Reducir</span></td><td style="color:#666;font-size:12px;">~5 pedidos/mes a 21 € cada uno. No es suscripción pero sí patrón fijo. Cap 2/semana = -60 €/mes.</td></tr>
+        <tr><td>Seguro moto (futuro)</td><td>Fijo</td><td style="text-align:right;">40–70</td><td style="text-align:right;">480–840</td><td><span class="kb ka">Planificar</span></td><td style="color:#666;font-size:12px;">Incorporar en calculadora cuando esté confirmado.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px;">
+    <div style="background:#FEECEC;border-radius:8px;padding:12px;"><div style="font-size:11px;font-weight:500;color:#7A1F1F;margin-bottom:4px;">Eliminar / reducir ya</div><div style="font-size:22px;font-weight:500;color:#7A1F1F;">-115 €/mes</div><div style="font-size:11px;color:#c0392b;margin-top:2px;">Arbitrade + Glovo cap + Disney</div></div>
+    <div style="background:#FEF3E0;border-radius:8px;padding:12px;"><div style="font-size:11px;font-weight:500;color:#7A4800;margin-bottom:4px;">Bajar plan Adobe</div><div style="font-size:22px;font-weight:500;color:#7A4800;">-18 €/mes</div><div style="font-size:11px;color:#7A4800;margin-top:2px;">Si bajas al plan Photography</div></div>
+    <div style="background:#EDFAEF;border-radius:8px;padding:12px;"><div style="font-size:11px;font-weight:500;color:#1A5E2A;margin-bottom:4px;">Total ahorro posible</div><div style="font-size:22px;font-weight:500;color:#1A5E2A;">~133 €/mes</div><div style="font-size:11px;color:#1A5E2A;margin-top:2px;">1.596 € al año</div></div>
+  </div>
+</div>
+
+<!-- CATEGORIAS -->
+<div id="t-categorias" class="tab">
+  <div class="alert alert-amber">Media mensual enero–abril. Barra sólida = target. Barra transparente = gasto real actual.</div>
+  <div class="card">
+    <p class="sec-title">Real vs target recomendado</p>
+    <div id="cat-list"></div>
+    <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px;font-size:13px;color:#444;">
+      Alcanzando todos los targets: <strong>~1.850 €/mes</strong> variable. Mayor palanca: restaurantes → <strong>-330 €/mes</strong>.
+    </div>
+  </div>
+  <div class="card">
+    <p class="sec-title">Cómo bajar cada categoría</p>
+    <div style="font-size:13px;line-height:1.9;color:#444;">
+      <div><strong>Restaurantes (630 € → 300 €):</strong> Máximo 2 salidas por semana. Robata, Colmado Wilmot y similares solo en ocasiones especiales — no rutina mensual de 75–130 €/cena.</div>
+      <div><strong>Transporte (438 € → 250 €):</strong> Reservar billetes con 4+ semanas = precio a la mitad. Taxis: metro para trayectos urbanos cortos.</div>
+      <div><strong>Compras (189 € → 100 €):</strong> Klarna facilita impulsos. Lista de espera de 48h antes de cualquier compra online.</div>
+      <div><strong>Delivery (109 € → 50 €):</strong> Cap de 2 pedidos/semana. Un Glovo a 21 € es lo mismo que una cena fuera — elegir uno.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LABELS = ['May 26','Jun 26','Jul 26','Ago 26','Sep 26','Oct 26','Nov 26','Dic 26','Ene 27','Feb 27','Mar 27','Abr 27','May 27','Jun 27'];
+const fmt = v => Math.round(v).toLocaleString('es-ES') + ' \u20ac';
+
+function switchTab(n) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('act'));
+  document.getElementById('t-'+n).classList.add('active');
+  ['estado','calculadora','redistribucion','recurrentes','categorias'].forEach((x,i) => {
+    if(x===n) document.querySelectorAll('.tab-btn')[i].classList.add('act');
+  });
+  if(n==='calculadora') initCalc();
+  if(n==='redistribucion') initDist();
+  if(n==='categorias') renderCats();
+}
+
+function syncOut(id) {
+  const v = +document.getElementById('sl-'+id).value;
+  const s = id==='sueldo' && v===0 ? ' \u20ac (sin trabajo)' : ' \u20ac';
+  document.getElementById('out-'+id).textContent = Math.round(v).toLocaleString('es-ES') + s;
+}
+
+/* RESET DEFAULTS */
+const CALC_DEFAULTS = {paro:1050,sueldo:0,paro2:550,gasto:2200,ahorro:16000,mes:4};
+const FIXED_DEFAULTS = [{name:"Alquiler",amount:757},{name:"Basic Fit",amount:30},{name:"Adobe",amount:30}];
+const DIST_DEFAULTS = {paro:1050,comp:1500,sueldo:0,alq:757,rest:630,transp:438,super:196,compras:298,bizum:537,fijos:195};
+
+function resetCalc(){
+  document.getElementById("sl-paro").value=CALC_DEFAULTS.paro;
+  document.getElementById("sl-sueldo").value=CALC_DEFAULTS.sueldo;
+  document.getElementById("sl-paro2").value=CALC_DEFAULTS.paro2;
+  document.getElementById("sl-gasto").value=CALC_DEFAULTS.gasto;
+  document.getElementById("sl-ahorro").value=CALC_DEFAULTS.ahorro;
+  document.getElementById("sel-mes").value=CALC_DEFAULTS.mes;
+  ["paro","sueldo","paro2","gasto","ahorro"].forEach(id=>syncOut(id));
+  if(!paroExcluyente) toggleExcluyente();
+  updateCalc();
+}
+function resetFixed(){
+  fixedItems=JSON.parse(JSON.stringify(FIXED_DEFAULTS));
+  renderFixed();
+  updateCalc();
+}
+function resetDist(){
+  Object.entries(DIST_DEFAULTS).forEach(([k,v])=>{
+    const el=document.getElementById("d-"+k);
+    if(el) el.value=v;
+  });
+  updateDist();
+}
+
+/* GASTOS FIJOS */
+let fixedItems = [
+  {name:'Alquiler', amount:757},
+  {name:'Basic Fit', amount:30},
+  {name:'Adobe', amount:30}
+];
+function renderFixed() {
+  document.getElementById('fixed-list').innerHTML = fixedItems.map((item,i) => `
+    <div class="fixed-row">
+      <input type="text" value="${item.name}" placeholder="Concepto" onchange="fixedItems[${i}].name=this.value" style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px;">
+      <input type="number" value="${item.amount}" min="0" step="10" onchange="fixedItems[${i}].amount=+this.value;updateCalc()" style="width:80px;padding:5px 8px;border-radius:6px;border:1px solid #ddd;font-size:13px;text-align:right;">
+      <span style="font-size:12px;color:#888;">\u20ac/mes</span>
+      <button onclick="fixedItems.splice(${i},1);renderFixed();updateCalc();" style="background:none;border:none;cursor:pointer;color:#c0392b;font-size:18px;line-height:1;">\xd7</button>
+    </div>`).join('');
+}
+function addFixed() { fixedItems.push({name:'',amount:0}); renderFixed(); }
+
+/* PROJECTION ENGINE */
+let paroExcluyente = true;
+function toggleExcluyente() {
+  paroExcluyente = !paroExcluyente;
+  const btn = document.getElementById('btn-excluyente');
+  const txt = document.getElementById('txt-excluyente');
+  if(paroExcluyente) {
+    btn.style.background='#3266AD'; btn.style.color='white'; btn.textContent='Excluyente';
+    txt.textContent='Al trabajar, el paro se suspende.';
+  } else {
+    btn.style.background='white'; btn.style.color='#3266AD'; btn.textContent='Compatible';
+    txt.textContent='Paro y sueldo se suman aunque trabajes.';
+  }
+  updateCalc();
+}
+function calcProj(gastoVar, ahorroInit, paroActual, trabajoMes, sueldo, paroReducido) {
+  const totalFixed = fixedItems.reduce((s,f) => s+(+f.amount||0), 0);
+  let ahorros = ahorroInit;
+  const data = [Math.round(ahorros)];
+  let agotaLabel = null, jun27 = null;
+  for(let i=0; i<13; i++) {
+    const trabajando = trabajoMes >= 0 && i >= trabajoMes;
+    let ing;
+    if(trabajando) {
+      ing = paroExcluyente ? sueldo : sueldo + paroActual;
+    } else {
+      ing = i>=8 ? paroReducido : paroActual;
+    }
+    const gasto = gastoVar + totalFixed;
+    ahorros -= (gasto - ing);
+    if(ahorros<0 && !agotaLabel) agotaLabel = LABELS[i+1];
+    ahorros = Math.max(0, ahorros);
+    if(i===12) jun27 = Math.round(ahorros);
+    data.push(Math.round(ahorros));
+  }
+  const quema = (ahorroInit - (jun27??data[data.length-1])) / 13;
+  return { data, agotaLabel, jun27: jun27??data[data.length-1], quema: Math.round(quema) };
+}
+
+/* CALCULADORA */
+let calcChart = null, calcInited = false;
+function initCalc() {
+  if(!calcInited) { calcInited=true; renderFixed(); updateCalc(); }
+}
+function updateCalc() {
+  const gasto=+document.getElementById('sl-gasto').value;
+  const ahorro=+document.getElementById('sl-ahorro').value;
+  const paro=+document.getElementById('sl-paro').value;
+  const paro2=+document.getElementById('sl-paro2').value;
+  const sueldo=+document.getElementById('sl-sueldo').value;
+  const tmes=+document.getElementById('sel-mes').value;
+  const res = calcProj(gasto, ahorro, paro, tmes, sueldo, paro2);
+  document.getElementById('calc-jun27').textContent = fmt(res.jun27);
+  document.getElementById('calc-agota').textContent = res.agotaLabel || '> Jun 2027';
+  document.getElementById('calc-quema').textContent = fmt(Math.abs(res.quema))+'/mes';
+  const e = res.jun27>10000?'Muy bien':res.jun27>5000?'Controlado':res.jun27>2000?'Ajustado':'Crítico';
+  const ec = res.jun27>5000?'#1A5E2A':res.jun27>2000?'#7A4800':'#7A1F1F';
+  document.getElementById('calc-estado').textContent=e;
+  document.getElementById('calc-estado').style.color=ec;
+  const ac = res.agotaLabel?'alert-red':res.jun27>8000?'alert-green':res.jun27>3000?'alert-amber':'alert-red';
+  const am = res.agotaLabel
+    ? 'Los ahorros se agotan en '+res.agotaLabel+'. Ajusta para llegar a junio 2027.'
+    : res.jun27>8000 ? 'Escenario cómodo. Llegas a junio 2027 con '+fmt(res.jun27)+'.'
+    : res.jun27>3000 ? 'Llegas a junio 2027 con '+fmt(res.jun27)+'. Ajustado pero viable.'
+    : 'Menos de 3.000 € en jun 2027. Sin margen de seguridad.';
+  document.getElementById('calc-alert').className='alert '+ac;
+  document.getElementById('calc-alert').textContent=am;
+  const lc = res.jun27>5000?'#1D9E75':res.jun27>2000?'#BA7517':'#E24B4A';
+  const bg = res.jun27>5000?'rgba(29,158,117,0.07)':res.jun27>2000?'rgba(186,117,23,0.07)':'rgba(226,75,74,0.07)';
+  if(calcChart) calcChart.destroy();
+  calcChart = new Chart(document.getElementById('chartCalc'), {
+    type:'line',
+    data:{ labels:LABELS, datasets:[
+      {label:'Ahorros',data:res.data,borderColor:lc,backgroundColor:bg,fill:true,tension:0.3,pointRadius:3,borderWidth:2},
+      {label:'Mínimo',data:LABELS.map(()=>3000),borderColor:'#E24B4A',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
+    ]},
+    options:{ responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.raw).toLocaleString('es-ES')+' €'}}},
+      scales:{y:{min:0,ticks:{callback:v=>v.toLocaleString('es-ES')+' €',font:{size:11}}},x:{ticks:{font:{size:11},autoSkip:false,maxRotation:45}}}
+    }
+  });
+}
+
+/* REDISTRIBUCIÓN */
+let distChart = null;
+function initDist() { updateDist(); }
+function updateDist() {
+  const ids = ['paro','comp','sueldo','alq','rest','transp','super','compras','bizum','fijos'];
+  ids.forEach(id => {
+    const el = document.getElementById('dv-'+id);
+    if(el) el.textContent = Math.round(+document.getElementById('d-'+id).value).toLocaleString('es-ES')+' €';
+  });
+  const paro=+document.getElementById('d-paro').value;
+  const comp=+document.getElementById('d-comp').value;
+  const sueldo=+document.getElementById('d-sueldo').value;
+  const alq=+document.getElementById('d-alq').value;
+  const rest=+document.getElementById('d-rest').value;
+  const transp=+document.getElementById('d-transp').value;
+  const sup=+document.getElementById('d-super').value;
+  const compras=+document.getElementById('d-compras').value;
+  const bizum=+document.getElementById('d-bizum').value;
+  const fijos=+document.getElementById('d-fijos').value;
+  const totalIn=paro+comp+sueldo;
+  const totalOut=alq+rest+transp+sup+compras+bizum+fijos;
+  const balance=totalIn-totalOut;
+  const quema=Math.max(0,-balance);
+  document.getElementById('dist-total-in').textContent=fmt(totalIn);
+  document.getElementById('dist-total-out').textContent=fmt(totalOut);
+  document.getElementById('dist-balance').textContent=(balance>=0?'+':'')+fmt(balance);
+  document.getElementById('dist-balance').style.color=balance>=0?'#1A5E2A':'#7A1F1F';
+  document.getElementById('dist-quema').textContent=fmt(quema)+'/mes';
+  let ahorros=16000;
+  const data=[16000];
+  let agota=null;
+  for(let i=0;i<13;i++){
+    ahorros=Math.max(0,ahorros-quema);
+    if(ahorros===0&&!agota) agota=LABELS[i+1];
+    data.push(Math.round(ahorros));
+  }
+  const jun27=data[13];
+  document.getElementById('dist-jun27').textContent=fmt(jun27);
+  const e=jun27>10000?'Muy bien':jun27>5000?'Controlado':jun27>2000?'Ajustado':'Crítico';
+  document.getElementById('dist-estado').textContent=e;
+  document.getElementById('dist-estado').style.color=jun27>5000?'#1A5E2A':jun27>2000?'#7A4800':'#7A1F1F';
+  const ac=agota?'alert-red':jun27>8000?'alert-green':jun27>3000?'alert-amber':'alert-red';
+  document.getElementById('dist-alert').className='alert '+ac;
+  document.getElementById('dist-alert').textContent=agota
+    ?'Con esta distribución los ahorros se agotan en '+agota+'.'
+    :'Llegas a junio 2027 con '+fmt(jun27)+'.';
+  const lc=jun27>5000?'#1D9E75':jun27>2000?'#BA7517':'#E24B4A';
+  if(distChart) distChart.destroy();
+  distChart = new Chart(document.getElementById('chartDist'), {
+    type:'line',
+    data:{labels:LABELS,datasets:[
+      {label:'Ahorros',data,borderColor:lc,backgroundColor:lc+'18',fill:true,tension:0.3,pointRadius:3,borderWidth:2},
+      {label:'Mínimo',data:LABELS.map(()=>3000),borderColor:'#E24B4A',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.dataset.label+': '+Math.round(c.raw).toLocaleString('es-ES')+' €'}}},
+      scales:{y:{min:0,ticks:{callback:v=>v.toLocaleString('es-ES')+' €',font:{size:11}}},x:{ticks:{font:{size:11},autoSkip:false,maxRotation:45}}}
+    }
+  });
+}
+
+/* CATEGORIAS */
+const catItems = [
+  {name:'Restaurantes/bares',real:630,target:300,color:'#E24B4A'},
+  {name:'Transporte/viajes',real:438,target:250,color:'#3266AD'},
+  {name:'Revolut',real:292,target:200,color:'#73726c'},
+  {name:'Bizum',real:245,target:200,color:'#BA7517'},
+  {name:'Supermercado',real:196,target:180,color:'#1D9E75'},
+  {name:'Compras',real:189,target:100,color:'#7F77DD'},
+  {name:'Delivery',real:109,target:50,color:'#EF9F27'},
+  {name:'Suscripciones',real:76,target:60,color:'#5DCAA5'},
+];
+function renderCats() {
+  const max=Math.max(...catItems.map(c=>c.real));
+  document.getElementById('cat-list').innerHTML=catItems.map(c=>{
+    const s=c.real-c.target;
+    return `<div class="cat-row">
+      <span class="cat-lbl">${c.name}</span>
+      <div class="cat-track">
+        <div class="cat-fill-bg" style="width:${(c.real/max*100).toFixed(1)}%;background:${c.color};"></div>
+        <div class="cat-fill-fg" style="width:${(c.target/max*100).toFixed(1)}%;background:${c.color};"></div>
+      </div>
+      <span class="cat-val">${c.real} \u20ac</span>
+      <span class="cat-delta">${s>20?'-'+s+' \u20ac':'ok'}</span>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
